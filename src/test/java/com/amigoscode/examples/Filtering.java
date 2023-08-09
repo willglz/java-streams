@@ -17,26 +17,34 @@ public class Filtering {
     @Test
     public void filter() throws Exception {
         List<Car> cars = MockData.getCars();
+        cars
+                .stream()
+                .filter(car -> car.getPrice() < 20_000.00)
+                .filter(car -> car.getColor().equals("Yellow"))
+                .toList()
+                .forEach(System.out::println);
     }
 
     @Test
     public void dropWhile() throws Exception {
-        System.out.println("using filter");
-        Stream.of(2, 4, 6, 8, 9, 10, 12).filter(n -> n % 2 == 0)
+        System.out.println("Using Filter");
+        Stream.of(2, 4, 6, 8, 9, 10, 12)
+                .filter(n -> n % 2 == 0)
                 .forEach(n -> System.out.print(n + " "));
-        System.out.println();
-        System.out.println("using dropWhile");
+        System.out.println("Using dropWhile");
+
     }
 
     @Test
     public void takeWhile() throws Exception {
-        // using filter
-        System.out.println("using filter");
-        Stream.of(2, 4, 6, 8, 9, 10, 12).filter(n -> n % 2 == 0)
+        System.out.println("Using Filter");
+        Stream.of(2, 4, 6, 8, 9, 10, 12)
+                .filter(n -> n % 2 == 0)
                 .forEach(n -> System.out.print(n + " "));
-
-        System.out.println();
-        System.out.println("using take while");
+        System.out.println("Using takeWhile");
+        Stream.of(2, 4, 6, 8, 9, 10, 12)
+                .takeWhile(n -> n % 2 == 0)
+                .forEach(n -> System.out.print(n + " "));
     }
 
     @Test
