@@ -50,21 +50,35 @@ public class Filtering {
     @Test
     public void findFirst() throws Exception {
         int[] numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        int result = Arrays.stream(numbers)
+                .filter(n -> n == 6)
+                .findFirst()
+                .orElse(-1);
+        System.out.println(result);
     }
 
     @Test
     public void findAny() throws Exception {
         int[] numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 10};
+        int result = Arrays.stream(numbers)
+                .filter(n -> n == 6)
+                .findAny()
+                .orElse(-1);
+        System.out.println(result);
     }
 
     @Test
     public void allMatch() throws Exception {
         int[] even = {2, 4, 6, 8, 10};
+        boolean allMatch = Arrays.stream(even).allMatch(n -> n % 2 == 0);
+        System.out.println(allMatch);
     }
 
     @Test
     public void anyMatch() throws Exception {
         int[] evenAndOneOdd = {2, 4, 6, 8, 10, 11};
+        boolean anyMatch = Arrays.stream(evenAndOneOdd).anyMatch(n -> n % 2 == 0);
+        System.out.println(anyMatch);
     }
 
 }
