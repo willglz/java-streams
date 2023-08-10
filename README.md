@@ -201,14 +201,143 @@ public void flatMapWithOptionals() {
 }
 ````
 Si observamos los anteriores ejemplos, la clave para entender el `flatMap` es fijarnos en su interior, cuando convertimos la lista de listas a una simple lista colocamos `List::stream`, en cambio, cuando convertimos la lista de optionals colocamos `Optional::stream`. Con esto nos podemos hacer una idea de como podemos usar `flapMap` para conversiones complejas.
-## List of topics for this course
-- What is functional programming
-- Stream API
-- Transformations with Map
-- Reduce
-- Filter
-- Collectors
-- Statistics
-- Grouping
-- Parallel steams
-- Exercises
+
+## Statistics with Streams
+Con streams también podemos obtener muchos datos estadísticos de interés, por ejemplo, el valor mínimo, máximo, suma de valores, cantidad de valores o un promedio.
+````java
+public void count() throws Exception {
+    List<Car> cars = MockData.getCars();
+    long ford = cars
+            .stream()
+            .filter(c -> c.getMake().equals("Ford"))
+            .filter(car -> car.getYear() > 2010)
+            .count();
+    System.out.println(ford);
+}
+
+public void min() throws Exception {
+    List<Car> cars = MockData.getCars();
+    double min = cars.stream()
+            .mapToDouble(Car::getPrice)
+            .min()
+            .orElse(0);
+    System.out.println(min);
+}
+
+public void max() throws Exception {
+    List<Car> cars = MockData.getCars();
+    double max = cars.stream()
+            .mapToDouble(Car::getPrice)
+            .max()
+            .orElse(0);
+    System.out.println(max);
+}
+
+public void average() throws Exception {
+    List<Car> cars = MockData.getCars();
+    OptionalDouble average = cars.stream()
+            .mapToDouble(Car::getPrice)
+            .average();
+    System.out.println(average);
+}
+
+public void sum() throws Exception {
+    List<Car> cars = MockData.getCars();
+    double sum = cars.stream()
+            .mapToDouble(Car::getPrice)
+            .sum();
+    System.out.println(BigDecimal.valueOf(sum));
+}
+
+public void statistics() throws Exception {
+    List<Car> cars = MockData.getCars();
+    DoubleSummaryStatistics statistics = cars.stream()
+            .mapToDouble(Car::getPrice)
+            .summaryStatistics();
+    System.out.println(statistics.getMin());
+    System.out.println(statistics.getMax());
+    System.out.println(statistics.getAverage());
+    System.out.println(statistics.getCount());
+    System.out.println(BigDecimal.valueOf(statistics.getSum()));
+}
+````
+
+## Agrupando datos con groupingBy
+De manera similar como lo hacemos en SQL con groupingBy, usando streams también podemos agrupar datos con `groupingBy`
+````java
+public void simpleGrouping() throws Exception {
+    List<Car> cars = MockData.getCars();
+    Map<String, List<Car>> make = cars.stream()
+            .collect(Collectors.groupingBy(Car::getMake));
+    make.forEach((s, cars1) -> {
+        System.out.println("Make: " + s);
+        cars1.forEach(System.out::println);
+        System.out.println("-------------------------");
+    });
+}
+````
+En el anterior ejemplo estamos agrupando autos por fabricante, si observamos obtenemos un `map` que cuya llave es el nombre del fabricante y el valor es o son un listado de los autos pertenecientes a dicho fabricante.
+````java
+public void groupingAndCounting() throws Exception {
+    List<String> names = List.of(
+            "John",
+            "John",
+            "Mariam",
+            "Alex",
+            "Mohammado",
+            "Mohammado",
+            "Vincent",
+            "Alex",
+            "Alex"
+    );
+    Map<String, Long> map = names.stream()
+            .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+    System.out.println(map);
+}
+````
+El anterior ejemplo es un poco diferente, con `Function.identity()` como primer parámetro y con `Collectors.counting()` como segundo parámetro logramos obtener la cantidad de nombres que se repiten en nuestra lista.
+
+## Sorting con Streams
+Una de las grandes ventajas que nos ofrecen los Streams es que podemos hacer sorting de manera sumamente sencilla por medio del operador `sorted`
+````java
+public void sortingSteamOfElements() throws IOException {
+    List<Person> people = MockData.getPeople();
+    people.stream()
+            .map(Person::getFirstName)
+            .sorted()
+            .toList()
+            .forEach(System.out::println);
+}
+
+public void sortingSteamOfElementsReverse() throws IOException {
+    List<Person> people = MockData.getPeople();
+    people.stream()
+            .map(Person::getFirstName)
+            .sorted(Comparator.reverseOrder())
+            .toList()
+            .forEach(System.out::println);
+}
+````
+En el anterior ejemplo, primer método, utilizamos `map` para obtener un `Stream<String>` que contiene el primer nombre de las personas, luego con `sorted()` los ordenamos de manera ascendente.
+En el segundo método observemos que dentro de `sorted()` colocamos `Comparatos.reverseOrder()` para que el orden sea invertido.
+````java
+public void sortingSteamOfObjets() throws IOException {
+    List<Person> people = MockData.getPeople();
+    people.stream()
+            .sorted(Comparator.comparing(Person::getFirstName))
+            .toList()
+            .forEach(System.out::println);
+}
+
+public void topTenMostExpensiveBlueCars() throws IOException {
+    List<Car> cars = MockData.getCars();
+    cars.stream()
+            .filter(car -> car.getColor().equalsIgnoreCase("Blue"))
+            .sorted(Comparator.comparing(Car::getPrice).reversed())
+            .limit(10)
+            .toList()
+            .forEach(System.out::println);
+}
+````
+También podemos ordenar objetos enteros como vemos en el anterior ejemplo, esta vez no estamos mapeando absolutamente nada, creamos un stream y luego usamos `sorted()` pero con la diferencia que ahora dentro colocamos `Comparator.comparing(Person::getFirstName)` con esto hacemos que el listado de objetos se ordene de forma ascendente por nombre.
+En el segundo ejemplo estamos obteniendo los diez autos azules mas caros.
